@@ -8,6 +8,11 @@ public class KnuthMorrisPratt {
 	public KnuthMorrisPratt(string s)
 	{
 		pattern = s;
+		for (int i = 0; i <= pattern.Length; i++) //convert to lower case
+        {
+            if (('A' <= pattern[i]) && (pattern[i] <= 'Z'))
+                pattern[i] = pattern[i] - 'A' + 'a';
+        }
 		failureTable = new int[s.Length];
 		createFailureTable();
 	}
@@ -39,6 +44,12 @@ public class KnuthMorrisPratt {
 
 	public int matchString(string s)
 	{
+		for (int i = 0; i <= s.Length; i++) // convert to lower case
+        {
+            if (('A' <= s[i]) && (s[i] <= 'Z'))
+                s[i] = s[i] - 'A' + 'a';
+        }
+        
 		int i = 0;
 		int j = 0;
 		bool found = false;

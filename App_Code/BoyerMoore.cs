@@ -13,6 +13,11 @@ public class BoyerMoore
     public BoyerMoore(string s)
     {
         pattern = s;
+        for (int i = 0; i <= pattern.Length; i++) //convert to lower case
+        {
+            if (('A' <= pattern[i]) && (pattern[i] <= 'Z'))
+                pattern[i] = pattern[i] - 'A' + 'a';
+        }
         lastOccurenceTable = new int[256];
         createLastOccurenceTable();
     }
@@ -32,6 +37,12 @@ public class BoyerMoore
 
     public int matchString(string s)
     {
+        for (int i = 0; i <= s.Length; i++) // convert to lower case
+        {
+            if (('A' <= s[i]) && (s[i] <= 'Z'))
+                s[i] = s[i] - 'A' + 'a';
+        }
+
         if (s.Length < pattern.Length)
         {
             return FAIL_RETURN;
