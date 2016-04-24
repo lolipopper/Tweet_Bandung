@@ -1,0 +1,118 @@
+﻿@{
+    Layout = "~/_SiteLayout.cshtml";
+    Page.Title = "Result";
+    twitterapi tapi = new twitterapi();
+    BoyerMoore BM;
+    KnuthMorrisPratt KMP;
+    MinGetter Mini;
+}
+
+@using TweetSharp;
+
+<hgroup class="title">
+    <h1>@Page.Title.</h1>
+    <h2>Your result page.</h2>
+</hgroup>
+
+@{
+    string mention = Request.Form["Mention"];
+    string[] keys = new string[3]; // <-----
+
+    keys[0] = Request.Form["Keyword1"];
+    keys[1] = Request.Form["Keyword2"];
+    keys[2] = Request.Form["Keyword3"];
+    IEnumerable<TwitterStatus> tweets = tapi.getTwit(mention);
+    if (tweets == null)
+    {
+        <h3>Nothing to show here...</h3>
+        <a href="~/Default.cshtml">Go Back to Home</a>
+    }
+    else
+    {
+        <p>@tweets.Count()</p>
+
+        // marking and counting each tweet category
+
+        int[] counter = new int[4]; // <-----
+        int[] idxes = new int[4]; // <-----
+        idxes[3] = 1000000000; // <-----
+
+        foreach (var tweet in tweets)
+        {
+            KMP = new KnuthMorrisPratt(tweet.Text);
+
+            for (int i = 0; i < 3; i++) // <-----
+            {   
+                idxes[i] = KMP.matchString(keys[i]);
+                <p>Searching <strong>@keys[i]</strong> in "@tweet.Text"</p>
+                <p>Result of string matching @idxes[i]</p>
+            }
+            Mini = new MinGetter(idxes);
+            counter[Mini.Get()]++;
+            tweet.IdStr = (char)Mini.Get() + tweet.IdStr;
+        }
+
+        // printing out the result
+
+        string marker;
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (i == 0)
+            {
+                <h2>Kategori PDAM</h2>
+                <h3>Jumlah: @counter[0]</h3>
+                <h3>Daftar tweet: </h3>
+            }
+            else if (i == 1)
+            {
+                <h2>Kategori Dinas</h2>
+                <h3>Jumlah: @counter[1]</h3>
+                <h3>Daftar tweet: </h3>
+            }
+            else if (i == 2)
+            {
+                <h2>Kategori Dll</h2>
+                <h3>Jumlah: @counter[2]</h3>
+                <h3>Daftar tweet: </h3>
+            }
+            else
+            {
+                <h2>Kategori Unknown</h2>
+                <h3>Jumlah: @counter[3]</h3>
+                <h3>Daftar tweet: </h3>
+            }
+            foreach (var tweet in tweets)
+            {
+                marker = tweet.IdStr;
+                if (marker[0] == (char)i)
+                {
+                    <div class="tweet">
+                        <div class="picture">
+                            <img src="@tweet.User.ProfileImageUrl" alt="@tweet.User.ScreenName" title="@tweet.User.ScreenName" />
+                        </div>
+                        <div class="info">
+                            <p>@tweet.User.ScreenName</p>
+                            <span>@tweet.User.Name, @tweet.User.Description - @tweet.User.Location </span>
+                            <br />
+
+                            <a href="https://twitter.com/statuses/@tweet.Id" class="text">
+                                @tweet.Text
+                            </a>
+                            <div class="action">
+                                @tweet.CreatedDate.AddHours(3).ToString("d/M/yyyy HH:mm:ss")
+                                <a href="https://twitter.com/intent/tweet?in_reply_to=@tweet.Id" target="_blank">Reply</a> |
+                                <a href="https://twitter.com/intent/retweet?tweet_id=@tweet.Id" target="_blank">Retweet</a> |
+                                <a href="https://twitter.com/intent/favorite?tweet_id=@tweet.Id" target="_blank">Favorite</a>
+                            </div>
+                        </div>
+                        <div class="clear">
+
+                        </div>
+
+                    </div>
+                }
+            }
+        }
+    }
+}
