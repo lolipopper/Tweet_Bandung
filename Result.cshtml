@@ -1,13 +1,13 @@
 ﻿@{
     Layout = "~/_SiteLayout.cshtml";
     Page.Title = "Result";
-    twitterapi tapi = new twitterapi();
+    TweetAPI tapi = new TweetAPI();
     BoyerMoore BM;
     KnuthMorrisPratt KMP;
     MinGetter Mini;
 }
 
-@using TweetSharp;
+@using Tweetinvi;
 
 <hgroup class="title">
     <h1>@Page.Title.</h1>
@@ -22,7 +22,7 @@
     keys[1] = Parser.parse(Request.Form["Keyword2"]);
     keys[2] = Parser.parse(Request.Form["Keyword3"]);
     keys[3] = Parser.parse(Request.Form["Keyword4"]);
-    IEnumerable<TwitterStatus> tweets = tapi.getTwit(mention);
+    IEnumerable<Tweetinvi.Core.Interfaces.ITweet> tweets = tapi.getTwit(mention);
     if (tweets == null)
     {
         <h3>Nothing to show here...</h3>
@@ -30,34 +30,65 @@
     }
     else
     {
+        bool algo; //true = KMP, false = Boyer Moore
+        if (Request.Form["algorithm"] == "KMP")
+        {
+            algo = true;
+            <h3>Using KMP Algorithm</h3>
+        }
+        else
+        {
+            algo = false;
+            <h3>Using Boyer Moore Algorithm</h3>
+        }
+
         <p>@tweets.Count()</p>
 
         // marking and counting each tweet category
 
-        int[] counter = new int[4]; // <-----
-        int[] idxes = new int[4]; // <-----
-        idxes[3] = 1000000000; // <-----
+        int[] counter = new int[5]; // <-----
+        int[] idxes = new int[5]; // <-----
+        idxes[4] = 1000000000; // <-----
+
 
         foreach (var tweet in tweets)
         {
-            KMP = new KnuthMorrisPratt(tweet.Text);
+            for (int i = 0; i < 4; i++) // <-----
+            {
+                int minidx = 1000000001;
+                foreach (string key in keys[i])
+                {
+                    if (algo)
+                    {
+                        KMP = new KnuthMorrisPratt(key);
+                        idxes[i] = KMP.matchString(tweet.Text);
+                    }
+                    else
+                    {
+                        BM = new BoyerMoore(key);
+                        idxes[i] = BM.matchString(tweet.Text);
+                    }
 
-            for (int i = 0; i < 3; i++) // <-----
-            {   
-                idxes[i] = KMP.matchString(keys[i]);
-                <p>Searching <strong>@keys[i]</strong> in "@tweet.Text"</p>
-                <p>Result of string matching @idxes[i]</p>
+                    if (minidx < idxes[i])
+                    {
+                        idxes[i] = minidx;
+                    }
+                    else
+                    {
+                        minidx = idxes[i];
+                    }
+                }
             }
             Mini = new MinGetter(idxes);
             counter[Mini.Get()]++;
-            tweet.IdStr = (char)Mini.Get() + tweet.IdStr;
+            tweet.CreatedBy.UserDTO.IdStr = (char)Mini.Get() + tweet.CreatedBy.UserDTO.IdStr;
         }
 
         // printing out the result
 
         string marker;
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 5; i++) // <-----
         {
             if (i == 0)
             {
@@ -73,35 +104,43 @@
             }
             else if (i == 2)
             {
-                <h2>Kategori Dll</h2>
+                <h2>Kategori SatPol</h2>
                 <h3>Jumlah: @counter[2]</h3>
+                <h3>Daftar tweet: </h3>
+            }
+            else if (i == 3)
+            {
+                <h2>Kategori PJU DBMP</h2>
+                <h3>Jumlah: @counter[3]</h3>
                 <h3>Daftar tweet: </h3>
             }
             else
             {
                 <h2>Kategori Unknown</h2>
-                <h3>Jumlah: @counter[3]</h3>
+                <h3>Jumlah: @counter[4]</h3>
                 <h3>Daftar tweet: </h3>
             }
+
             foreach (var tweet in tweets)
             {
-                marker = tweet.IdStr;
+                marker = tweet.CreatedBy.UserDTO.IdStr;
                 if (marker[0] == (char)i)
                 {
                     <div class="tweet">
                         <div class="picture">
-                            <img src="@tweet.User.ProfileImageUrl" alt="@tweet.User.ScreenName" title="@tweet.User.ScreenName" />
+                            
+                            <img src="@tweet.CreatedBy.ProfileImageUrl" alt="@tweet.CreatedBy.ScreenName" title="@tweet.CreatedBy.ScreenName" />
                         </div>
                         <div class="info">
-                            <p>@tweet.User.ScreenName</p>
-                            <span>@tweet.User.Name, @tweet.User.Description - @tweet.User.Location </span>
+                            <p>@tweet.CreatedBy.Name</p>
+                            <span>@tweet.CreatedBy.Description - @tweet.CreatedBy.Location </span>
                             <br />
 
                             <a href="https://twitter.com/statuses/@tweet.Id" class="text">
                                 @tweet.Text
                             </a>
                             <div class="action">
-                                @tweet.CreatedDate.AddHours(3).ToString("d/M/yyyy HH:mm:ss")
+                                @tweet.CreatedAt.AddHours(3).ToString("d/M/yyyy HH:mm:ss")
                                 <a href="https://twitter.com/intent/tweet?in_reply_to=@tweet.Id" target="_blank">Reply</a> |
                                 <a href="https://twitter.com/intent/retweet?tweet_id=@tweet.Id" target="_blank">Retweet</a> |
                                 <a href="https://twitter.com/intent/favorite?tweet_id=@tweet.Id" target="_blank">Favorite</a>
@@ -115,5 +154,7 @@
                 }
             }
         }
+        <h3>Want to analyze again?</h3>
+        <a href="~/Default.cshtml">Go Back to Home</a>
     }
 }

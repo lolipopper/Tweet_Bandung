@@ -6,9 +6,9 @@ using System;
 
 public static class Parser
 {
-    public string[] parse(string s)
+    public static string[] parse(string s)
     {
         char[] delimiterChars = {';',' '};
-        return text.Split(delimiterChars);
+        return s.Split(delimiterChars);
     }
 }

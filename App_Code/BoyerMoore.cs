@@ -4,13 +4,16 @@
 /// Summary description for Class1
 /// </summary>
 
-public class BoyerMoore : Pattern
+public class BoyerMoore
 {
+    private string pattern;
     private int[] lastOccurenceTable;
+    private const int FAIL_RETURN = 1000000001;
 
     public BoyerMoore(string s)
     {
         pattern = s.ToLower();
+        
         lastOccurenceTable = new int[256];
         createLastOccurenceTable();
     }
@@ -28,9 +31,9 @@ public class BoyerMoore : Pattern
         }
     }
 
-    public override int matchString(string s)
+    public int matchString(string sin)
     {
-        s = s.ToLower();
+        string s = sin.ToLower();
 
         if (s.Length < pattern.Length)
         {

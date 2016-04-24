@@ -1,6 +1,6 @@
 using System;
 
-public class KnuthMorrisPratt : Pattern {
+public class KnuthMorrisPratt {
 	private string pattern;
 	private int[] failureTable;
 	private const int FAIL_RETURN = 1000000001;
@@ -8,6 +8,7 @@ public class KnuthMorrisPratt : Pattern {
 	public KnuthMorrisPratt(string s)
 	{
 		pattern = s.ToLower();
+		
 		failureTable = new int[s.Length];
 		createFailureTable();
 	}
@@ -37,10 +38,10 @@ public class KnuthMorrisPratt : Pattern {
 		}
 	}
 
-	public int matchString(string s)
+	public int matchString(string sin)
 	{
-		s = s.ToLower();
-
+        string s = sin.ToLower();
+        
 		int i = 0;
 		int j = 0;
 		bool found = false;
