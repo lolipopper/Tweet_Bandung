@@ -16,11 +16,12 @@
 
 @{
     string mention = Request.Form["Mention"];
-    string[] keys = new string[3]; // <-----
+    string[][] keys = new string[4][]; // <-----
 
-    keys[0] = Request.Form["Keyword1"];
-    keys[1] = Request.Form["Keyword2"];
-    keys[2] = Request.Form["Keyword3"];
+    keys[0] = Parser.parse(Request.Form["Keyword1"]);
+    keys[1] = Parser.parse(Request.Form["Keyword2"]);
+    keys[2] = Parser.parse(Request.Form["Keyword3"]);
+    keys[3] = Parser.parse(Request.Form["Keyword4"]);
     IEnumerable<TwitterStatus> tweets = tapi.getTwit(mention);
     if (tweets == null)
     {
