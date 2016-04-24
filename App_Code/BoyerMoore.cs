@@ -4,20 +4,13 @@
 /// Summary description for Class1
 /// </summary>
 
-public class BoyerMoore
+public class BoyerMoore : Pattern
 {
-    private string pattern;
     private int[] lastOccurenceTable;
-    private const int FAIL_RETURN = 1000000001;
 
     public BoyerMoore(string s)
     {
-        pattern = s;
-        for (int i = 0; i <= pattern.Length; i++) //convert to lower case
-        {
-            if (('A' <= pattern[i]) && (pattern[i] <= 'Z'))
-                pattern[i] = pattern[i] - 'A' + 'a';
-        }
+        pattern = s.ToLower();
         lastOccurenceTable = new int[256];
         createLastOccurenceTable();
     }
@@ -35,13 +28,9 @@ public class BoyerMoore
         }
     }
 
-    public int matchString(string s)
+    public override int matchString(string s)
     {
-        for (int i = 0; i <= s.Length; i++) // convert to lower case
-        {
-            if (('A' <= s[i]) && (s[i] <= 'Z'))
-                s[i] = s[i] - 'A' + 'a';
-        }
+        s = s.ToLower();
 
         if (s.Length < pattern.Length)
         {
